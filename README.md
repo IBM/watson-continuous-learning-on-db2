@@ -262,24 +262,139 @@ the top left to reveal the **Node** hostname (for example,
 `cap-sg-prd-2.integration.ibmcloud.com`). Take note of this value, because
 you'll need it to configure data federation later.
 
-### Connect to on-premise Db2 database from Watson Studio
+### Federate your database
 
-Create a **New Project**.
+Db2 data virtualization (also known as data federation) is supported by Db2 on
+Cloud. Data virtualization gives you single-query access to all of your data
+that is on any number of databases distributed anywhere in your organization.
+You can access data that is on any of your Db2 or Informix data sources, both
+in the cloud and on premises.
 
-![Watson Studio home](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-dataplatform-home.png)
+This feature is supported on all versions of Db2 on Cloud, except for the free
+Lite plan.
 
-Select **Complete**, when prompted.
+Create a Db2 instance that we'll use a client:
+
+```bash
+docker run \
+  --name db2-client \
+  --env LICENSE="accept" \
+  --env DB2INST1_PASSWORD="db2inst1-pwd" \
+  --detach \
+  ibmcom/db2express-c \
+  db2start
+```
+
+TODO: Create a Db2 on Cloud server.
+
+Store the location of the federated server on the client:
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 catalog tcpip node fedS remote 10.1.1.100 server 50000"
+DB20000I The CATALOG TCPIP NODE command completed successfully.
+```
+
+Store the location of the `bludb` database on the Db2 on cloud machine as `clouddb` on client.
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 catalog db bludb as clouddb at node fedS
+DB20000I The CATALOG DATABASE command completed successfully.
+```
+
+Connect to the `clouddb` database using bluadmin user:
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 connect to clouddb user bluadmin using db2inst1"
+Database Connection Information
+Database server = DB2/LINUXX8664 11.1.3.3
+SQL authorization ID = BLUADMIN
+Local database alias = CLOUDDB
+```
+
+Create a wrapper on Db2 on Cloud.
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 'CREATE WRAPPER drda'"
+DB20000I The SQL command completed successfully.
+```
+
+Next, the IBM Cloud Secure Gateway service will allow the Db2 on Cloud database
+to communicate with the on-prem data source.
+
+Begin by storing the value of your Secure Gateway's **Node** hostname in a
+variable (just to avoid typos).
+
+```bash
+export SECURE_GATEWAY_NODE=cap-sg-prd-2.integration.ibmcloud.com
+```
+
+Use the `SECURE_GATEWAY_NODE` to create a server to talk to the on-prem
+datasource:
+
+> TODO Check that port 15507 corresponds to something.
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 'create server db2server type dashdb version 11 wrapper drda authorization \"db2inst1\" password \"db2inst1\" options (host \"$SECURE_GATEWAY_NODE\", port \"15507\", dbname \"onprem\")'"
+DB20000I The SQL command completed successfully.
+```
+
+Create the user mapping for remote user db2inst1.
+
+The user bluadmin has to be on the Db2 on cloud machine.
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 'create user mapping for bluadmin server db2server options (remote_authid \"db2inst1\", remote_password \"db2inst1\")'"
+DB20000I The SQL command completed successfully.
+```
+
+Create a nickname for the on-prem datasource.
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 -v 'create nickname onprem for db2server.db2inst1.onprem'"
+create nickname onprem for db2server.db2inst1.violations
+DB20000I The SQL command completed successfully.
+```
+
+Test to make sure you can pull data from the on-prem datasource.
+
+```bash
+docker exec db2 su - db2inst1 -c "db2 'select * from onprem'"
+C1 C2
+----------- -----------
+13 32
+1 record(s) selected.
+```
+
+### Create a Watson Studio project
+
+From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
+[**AI**](https://console.bluemix.net/catalog/?category=ai) category, and then
+the [**Watson
+Studio**](https://console.bluemix.net/catalog/services/watson-studio) service.
+Then, click **Create**.
+
+![Create IBM Cloud Watson Studio service](doc/source/images/07.png)
+
+Click the **Get Started** button to navigate to Watson Studio.
+
+From Watson Studio, click the **New Project** button, and select **Complete**, when prompted, to enable all features in Watson Studio.
+
+![Watson Studio](doc/source/images/08.png)
+
+![Watson Studio](doc/source/images/09.png)
 
 Enter `Violations` as the project name, and click **Create**.
 
-![New Watson Studio project](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-new-project.png)
+![Watson Studio](doc/source/images/10.png)
 
-Near the top right of the screen, select the **Add to project** dropdown, choose
-**Connection**, and select **Db2** from the available options.
+Near the top right of the screen, select the **Add to project** dropdown and choose
+**Connection**.
 
-![Add to Watson Studio project](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-add-to-project.png)
+![New Watson Studio connection](doc/source/images/11.png)
 
-![New Db2 connection](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-new-db2-connection.png)
+Select **Db2** from the available options to connect to your on-premise Db2 server.
+
+![New Watson Studio connection](doc/source/images/12.png)
 
 Configure the connection as follows:
 
@@ -287,8 +402,7 @@ Configure the connection as follows:
 * **Database**: `onprem`
 * **Hostname or IP Address**: your workstation's LAN IP (e.g. `192.168.1.100`)
 * **Port**: `50000`
-* **Secure Gateway**: &#9745; (and ensure your new Secure Gateway is selected in
-  the corresponding dropdown menu)
+* **Secure Gateway**: &#9745; Use a secure gateway, and select _Db2_
 * **Username**: `watson`
 * **Password**: `secrete`
 
