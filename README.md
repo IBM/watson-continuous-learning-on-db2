@@ -41,6 +41,10 @@ learning as the training dataset evolves and grows.
   analytics at a massive scale.
 * [IBM Watson Studio](https://www.ibm.com/cloud/watson-studio): Build and train
   AI models, and prepare and analyze data, in a single, integrated environment.
+* [Secure Gateway](https://www.ibm.com/cloud/secure-gateway): Create a secure,
+  persistent connection between your protected environment and the cloud.
+* [Db2](https://www.ibm.com/analytics/us/en/db2/): On-premises database optimized
+  to deliver industry-leading performance while lowering costs.
 
 ## Featured technologies
 
