@@ -406,16 +406,14 @@ Configure the connection as follows:
 * **Username**: `watson`
 * **Password**: `secrete`
 
-In the secure gateway terminal, you should see a log message indicating that a
+Click **Create** when you are ready.
+
+![New connection configuration](doc/source/images/13.png)
+
+In the secure gateway terminal, you may see a log message indicating that a
 connection was successfully established from Watson Studio:
 
     [2018-08-31 10:38:38.708] [INFO] (Client ID K75lSQ0Oppd_d87) Connection #1 is being established to 192.168.1.100:50000
-
-Click the **Add to Project** dropdown again, and choose **Connected assets**.
-
-Click **Select source**, then choose the **On-Premise** connection, then the
-**WATSON** database, then the **VIOLATIONS** table, and finally, click the
-**Select** button at the bottom of the screen.
 
 #### Refine the asset
 
@@ -423,129 +421,137 @@ Watson Machine Learning models do not directly support data assets from
 on-premise Db2 instances, so we have to setup a conversion process to "refine"
 the data asset into a `CSV` file in object storage.
 
-From the **Data assets** table, click on **Violations** (with **Data Asset** in
-the **Type** column). At the top right, click **Refine**. We don't need to
+Click the **Add to Project** dropdown again, and choose **Connected assets**.
+
+![Add connected assets](doc/source/images/14.png)
+
+Click **Select source**, then choose the **On-Premise** connection, then the
+**WATSON** database, then the **VIOLATIONS** table, and finally, click the
+**Select** button at the bottom of the screen.
+
+![Select source](doc/source/images/15.png)
+
+Name the data asset `Violations On-Premise` and click **Create**.
+
+![Name the data asset](doc/source/images/16.png)
+
+We now need to associate our Apache Spark service and Watson Machine Learning services
+to Watson Studio so that Watson Studio can leverage them.
+
+Navigate to the **Settings** tab of your project, and click **Add service**.
+Choose **Spark** from the dropdown, switch to the **Existing** tab, select your Apache Spark instance
+from the list, and click **Select**.
+
+![Associate Apache Spark](doc/source/images/17.png)
+
+Once more, click **Add service**. Choose **Watson** from the dropdown,
+select your Watson Machine Learning instance from the catalog, click **Create**, and then **Confirm**.
+
+![Associate Watson](doc/source/images/18.png)
+
+From your project overview, click the **Assets** tab, and click on
+**Violations On-Premise** (with **Data Asset** in the **Type** column).
+
+![Data assets](doc/source/images/19.png)
+
+At the top right, click **Refine**. We don't need to
 manipulate the data, so simply click the "run" button labeled with a
 **&#9654;** icon at the top right. The data flow output will show that you're
 creating a `CSV` file, which will be saved into your object storage bucket.
-Click **Save and Run**. You can then opt to view the data flow's progress by
+Click **Save and Run**.
+
+![Refine data asset](doc/source/images/20.png)
+
+You can then opt to view the data flow's progress by
 clicking **View Flow**.
 
 From your project **Assets** screen, you should now see a new **Data asset**
-named `Violations_shaped.csv`.
+named `Violations On-Premise_shaped.csv`.
+
+![Shaped data](doc/source/images/21.png)
 
 ### Create a machine learning model
 
-#### Create a WML model
-
 From your project's **Assets** screen, click **New Watson Machine Learning
-model**. Name your model **Violations Predictor**, select your Apache Spark
-service instance from the **Spark Service or Environment** dropdown, and click
+model**.
+
+![New machine learning model](doc/source/images/22.png)
+
+Name your model **Violations Predictor**, select your Apache Spark service
+instance from the **Spark Service or Environment** dropdown, and click
 **Create**.
 
+![Violations predictor](doc/source/images/23.png)
+
 You'll then be asked to choose your data asset. Use the radio button to select
-the CSV file you just created, named `Violations_shaped.csv`, and click
+the CSV file you just created, named `Violations On-Premise_shaped.csv`, and click
 **Next**.
+
+![Shaped data](doc/source/images/24.png)
 
 When the data is finished loading, you'll be asked to **Select a technique**.
 Choose `INSPECTION_STATUS (String)` as your **Column value to predict (Label
-Col)**, and choose **Multiclass Classification** as your technique. Click
-**Train**.
+Col)**, and choose **Multiclass Classification** as your technique.
 
-When training is complete, click **Save** to store your model.
+Next, we need to manually select which classifier we'd like to use. Use the
+**Add Estimators** button to add a **Decision Tree Classifier**, and then
+repeat to add a **Random Forest Classifier**.
 
-You can now use the model's endpoint in your own application. However, if you
-also enable continuous learning, then your application will become smarter over
-time, without having to update the application.
+Finally, click **Next**.
 
-### Enable continuous learning
+![Configure model](doc/source/images/25.png)
 
-In order to enable continuous learning, we need to create a feedback loop to
-the machine learning model. To accomplish that, we need to create a feedback
-table in Db2 Warehouse on Cloud.
+When training for each model is complete (_Trained &amp; Evaluated_), review
+each of their performance metrics, select the one that best suits your use case
+(we'll use the _DecisionTreeClassifier_ here). Click **Save** to store your
+model.
 
-From the IBM Cloud dashboard, navigate to your Db2 Warehouse instance, and
-click **Open**. Use the hamburger menu **&#9776;** in the top left, and click
-**Run SQL**. Run the following two statements to create a feedback table, and a
-SQL trigger to automatically populate a new column as new rows are inserted.
+![Model training](doc/source/images/26.png)
 
-> TODO: This schema is not accepted by the performance monitor unless all the
-> `INTEGER` and `DOUBLE` columns are typed as VARCHAR, which seems absurd.
-> Otherwise, you get errors configuring performance monitoring such as "The
-> feedback table indicated in learning configuration VIOLATIONS_FEEDBACK
-> already exists, but it is not compatible with expected schema: Column ID has
-> incompatible type INTEGER vs expected StringType"
+You can now deploy the model to use in your own application. Click **Add Deployment**.
 
-> TODO: Why would you want the _TRAINING column to be non-nullable in the first
-> place?
+![Model trained](doc/source/images/27.png)
 
-> TODO: Is the Db2 trigger intended to ease first time setup, or is it supposed
-> to remain as part of the continuous learning process? I would think the
-> machine learning service would populate that column by itself, when
-> re-training occurs.
+Name the model **Inspection Status**, and click **Save**.
 
-    CREATE TABLE
-      violations_feedback(
-        ID INTEGER,
-        VIOLATION_CODE VARCHAR(20),
-        INSPECTOR_ID VARCHAR(15),
-        INSPECTION_STATUS VARCHAR(10),
-        INSPECTION_CATEGORY VARCHAR(10),
-        DEPARTMENT_BUREAU VARCHAR(30),
-        ADDRESS VARCHAR(250),
-        LATITUDE DOUBLE,
-        LONGITUDE DOUBLE,
-        "_TRAINING" TIMESTAMP NOT NULL)
-      ORGANIZE BY ROW;
+![Model deployment](doc/source/images/28.png)
 
-    CREATE TRIGGER
-      feedback_trigger
-      NO CASCADE
-      BEFORE INSERT ON violations_feedback
-      REFERENCING NEW AS n
-      FOR EACH ROW SET n."_TRAINING"=CURRENT_TIMESTAMP;
+Wait for your model to be deployed (_DEPLOY_SUCCESS_), and then click on it.
 
-    COMMIT;
+![Model deployed](doc/source/images/29.png)
 
-#### Performance Monitoring
-
-Next, we need to create a trigger in Watson Studio for re-training.
-
-From your project's **Assets** tab in Watson Studio, Click your machine
-learning model ("Violation Predictor"), click the **Evaluation** tab, and click
-**Configure Performance Monitoring**.
-
-Configure performance monitoring using the following values:
-
-* **Spark Service or Environment**: choose your Apache Spark instance
-* **Prediction type**: _multiclass_
-* **Metric details**: _accuracy_ (leave the value blank)
-* **Record count required for re-evaluation**: `100`
-* **Auto retrain**: _when model performance is below threshold_
-* **Auto deploy**: _when model performance is better than previous version_
-
-Click **Save**.
-
-When the configured trigger occurs, the Machine Learning service will pull in
-new data from the feedback table and re-train the model. If the new model
-performs better, then it will be automatically deployed.
+The deployed model will be be provided with documentation to consume the model in several different programming languages.
 
 ## Sample output
 
-![Continuous learning](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2.png)
+![Ready to consume cloud-based model](doc/source/images/30.png)
 
 ## Troubleshooting
 
-TODO
+* `No secure gateways found`: Your secure gateway client (in Docker) is not
+  connected. Verify that the Docker container is running and that the secure
+  gateway ID, token, and IP address allowed by the ACL are all configured
+  correctly.
+* `Retrieve instance summary error: An error occurred when getting instance
+  summary data.`: This is a transient error that may occur while creating a
+  secure gateway service. It can be avoided by dismissing the error dialog and
+  refreshing the page.
 
 ## Links
 
 * [Continuous Learning on Watson Studio](https://medium.com/ibm-data-science-experience/continuous-learning-on-watson-data-platform-cc39f3fd5042)
-* [IBM Continuous Learning Blog Post Companion Materials](https://github.com/IBMDataScience/buildings_blog)
+* [IBM Watson Studio](https://dataplatform.cloud.ibm.com/docs/content/getting-started/welcome-main.html) documentation
+* [IBM Secure Gateway](https://console.bluemix.net/docs/services/SecureGateway/index.html) documentation
+* [Docker](https://docs.docker.com/) documentation
+* [Db2](https://www.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.kc.doc/welcome.html) documentation
+* Related code pattern: [Continuous learning on Db2](https://github.com/IBM/watson-continuous-learning-on-db2)
+* Related video: [Continuous Learning on Watson Data Platform](https://www.youtube.com/watch?v=HCVxGMd1RiQ)
 
 ## Learn more
 
-TODO
+* **Artificial Intelligence Code Patterns**: Enjoyed this Code Pattern? Check out our other [AI Code Patterns](https://developer.ibm.com/code/technologies/artificial-intelligence/).
+* **AI and Data Code Pattern Playlist**: Bookmark our [playlist](https://www.youtube.com/playlist?list=PLzUbsvIyrNfknNewObx5N7uGZ5FKH0Fde) with all of our Code Pattern videos
+* **With Watson**: Want to take your Watson app to the next level? Looking to utilize Watson Brand assets? [Join the With Watson program](https://www.ibm.com/watson/with-watson/) to leverage exclusive brand, marketing, and tech resources to amplify and accelerate your Watson embedded commercial solution.
 
 ## License
 
