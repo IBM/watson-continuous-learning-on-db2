@@ -120,7 +120,7 @@ docker exec db2 useradd -g db2iadm1 watson
 ```
 
 ```bash
-docker exec -it db2 bash -c "echo secrete | passwd --stdin watson"
+docker exec db2 bash -c "echo secrete | passwd --stdin watson"
 ```
 
 ```bash
