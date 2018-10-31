@@ -2,7 +2,26 @@
 
 [![Build Status](https://travis-ci.org/IBM/watson-continuous-learning-on-db2.svg?branch=master)](https://travis-ci.org/IBM/watson-continuous-learning-on-db2)
 
-TODO
+Many companies and individuals struggle to use their on-premises data &mdash;
+the kind of data that lives on a local machine, within your data center, behind
+your firewall &mdash; for machine learning in the cloud. It can be challenging
+to find a quick, easy, and secure solution for connecting resources in a
+protected environment to resources in the cloud.
+
+With Watson Studio & Machine Learning, Db2, and Secure Gateway, it is possible
+to establish a secure, persistent connection between your on-premises data and
+the cloud to continuously train machine learning models leveraging cloud
+computing resources like Spark, elastic environments, and GPUs.
+
+In this guide, we will create an on-premises Db2 database on our local
+computer, populate it, and then connect it to Watson Studio via Secure Gateway.
+Then, we'll read Buildings Violations data from this database and build an
+initial model to predict the likelihood that a particular building will fail an
+inspection based on historical data from the City of Chicago. After we build
+the model, we will deploy it as an API endpoint with Watson Machine Learning
+that only authorized users can access. Lastly, we will setup performance
+monitoring for the model, and configure a trigger to enable continuous
+learning as the training dataset evolves and grows.
 
 ![Architecture](doc/source/images/architecture.png)
 
