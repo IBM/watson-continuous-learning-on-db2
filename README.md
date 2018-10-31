@@ -30,7 +30,7 @@ learning as the training dataset evolves and grows.
 1. Source data is retained in on-premise Db2 database.
 1. Data is accessible to Watson Studio via a Secure Gateway.
 1. Secure gateway is utilized to train a cloud-based machine learning model.
-1. Training feedback is stored in Db2 Warehouse for continuous learning.
+1. Training feedback is stored on-premise for continuous learning.
 
 ## Included components
 
@@ -58,10 +58,11 @@ learning as the training dataset evolves and grows.
 
 ## Steps
 
-1. [Create IBM Cloud service instances](#create-ibm-cloud-service-instances)
 1. [Load sample data into an on-premise Db2 database](#load-sample-data-into-an-on-premise-db2-database)
+1. [Create IBM Cloud service dependencies](#create-ibm-cloud-service-dependencies)
 1. [Configure a secure gateway to IBM Cloud](#configure-a-secure-gateway-to-ibm-cloud)
-1. [Connect to on-premise Db2 database from Watson Studio](#connect-to-on-premise-db2-database-from-watson-studio)
+1. [Federate your database](#federate-your-database)
+1. [Create a Watson Studio project](#create-a-watson-studio-project)
 1. [Create a machine learning model](#create-a-machine-learning-model)
 1. [Enable continuous learning](#enable-continuous-learning)
 
