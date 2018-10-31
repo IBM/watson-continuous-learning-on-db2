@@ -66,48 +66,6 @@ learning as the training dataset evolves and grows.
 1. [Create a machine learning model](#create-a-machine-learning-model)
 1. [Enable continuous learning](#enable-continuous-learning)
 
-### Create IBM Cloud service instances
-
-In order to build and train your machine learning model, you'll need to [sign
-up for Watson Studio](https://www.ibm.com/cloud/watson-studio), which you can
-do for free. In our use case, Watson Studio will rely on the Object Storage
-service to store it's data, the Apache Spark service for data processing,
-and the Machine Learning service for building machine learning models.
-Finally, we'll use a DB2 Warehouse to enable continuous learning.
-
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**Storage**](https://console.bluemix.net/catalog/?category=storage) category,
-and then the [**Object
-Storage**](https://console.bluemix.net/catalog/services/cloud-object-storage)
-service. Then, click **Create**.
-
-![Create IBM Cloud Object Storage service](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-create-object-storage.png)
-
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**Web and
-Application**](https://console.bluemix.net/catalog/?category=app_services)
-category, and then the [**Apache
-Spark**](https://console.bluemix.net/catalog/services/apache-spark) service.
-Then, click **Create**.
-
-![Create IBM Cloud Apache Spark instance](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-create-apache-spark.png)
-
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**AI**](https://console.bluemix.net/catalog/?category=ai) category, and then
-the [**Watson
-Studio**](https://console.bluemix.net/catalog/services/watson-studio) service.
-Then, click **Create**.
-
-![Create IBM Cloud Watson Studio service](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-create-watson-studio.png)
-
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**Databases**](https://console.bluemix.net/catalog/?category=databases)
-category, and then the [**Db2
-Warehouse**](https://console.bluemix.net/catalog/services/db2-warehouse)
-service. Then, click **Create**.
-
-![Create IBM Cloud Db2 Warehouse instance](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-create-db2-warehouse.png)
-
 ### Load sample data into an on-premise Db2 database
 
 The fastest way to get started with Db2 on-premise is to use the no-charge
@@ -219,14 +177,58 @@ $ hostname -I
 For the purposes of this code pattern, we'll assume that your LAN IP is
 `192.168.1.100`.
 
-Create a [Secure
-Gateway](https://console.bluemix.net/catalog/services/secure-gateway) from the
-IBM Cloud Catalog.
+### Create IBM Cloud service dependencies
 
-![Create a new Secure Gateway](http://browser-testing-cdn.dolphm.com/watson-continuous-learning-on-db2-new-secure-gateway.png)
+In order to build and train your machine learning model, you'll first need to
+[sign up for Watson Studio](https://www.ibm.com/cloud/watson-studio), which you
+can do for free. In our use case, Watson Studio will rely on the Object Storage
+service to store it's data, the Apache Spark service for data processing, and
+the Machine Learning service for building machine learning models.
 
-Once the gateway is created, select **Connect Client** and choose **Docker** as
-the connection method.
+From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
+[**Storage**](https://console.bluemix.net/catalog/?category=storage) category,
+and then the [**Object
+Storage**](https://console.bluemix.net/catalog/services/cloud-object-storage)
+service. Then, click **Create**.
+
+![Create IBM Cloud Object Storage service](doc/source/images/01.png)
+
+From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
+[**Web and
+Application**](https://console.bluemix.net/catalog/?category=app_services)
+category, and then the [**Apache
+Spark**](https://console.bluemix.net/catalog/services/apache-spark) service.
+Then, click **Create**.
+
+![Create IBM Cloud Apache Spark instance](doc/source/images/02.png)
+
+### Configure a secure gateway to IBM Cloud
+
+The secure gateway allows limited network ingress to your on-premise network as
+governed by an access control list (ACL). For our use case, we will allow
+Watson Studio to securely communicate with your on-premise Db2 instance.
+
+From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
+[**Integration**](https://console.bluemix.net/catalog/?category=app_services)
+category, and then the [**Secure
+Gateway**](https://console.bluemix.net/catalog/services/apache-spark) service.
+Then, click **Create**.
+
+![New secure gateway](doc/source/images/03.png)
+
+From the **Secure Gateway** creation screen, select the **Essentials** plan and
+click **Create**.
+
+![New secure gateway](doc/source/images/04.png)
+
+Once the gateway is created, click **Add Gateway** to add a gateway named _Db2_.
+
+![New Secure Gateway](doc/source/images/05.png)
+
+Select **Connect Client**, and take note of your **Gateway ID** and **Security
+Token**. Choose **Docker** as the connection method.
+
+![Connect Secure Gateway client](doc/source/images/06.png)
 
 The console will provide you with a complete Docker command to download and run
 the secure gateway client, which looks something like `docker run -it
@@ -246,11 +248,15 @@ Incoming connections from Watson Studio which pass through the secure gateway
 will now be able to access Db2.
 
 > When you're finished with this code pattern, you can close the secure gateway
-> by typing `quit` at the prompt and pressing <kbd>Enter</kbd>.
+> by typing `quit` at the secure gateway prompt and pressing <kbd>Enter</kbd>.
 
-See the
-[documentation](https://console.bluemix.net/docs/services/SecureGateway/index.html#getting-started-with-sg)
-for additional configuration options.
+At this point the link icon on the secure gateway screen should be green
+indicating that you have a client successfully connected.
+
+Before you leave the secure gateway configuration page, click the gear icon in
+the top left to reveal the **Node** hostname (for example,
+`cap-sg-prd-2.integration.ibmcloud.com`). Take note of this value, because
+you'll need it to configure data federation later.
 
 ### Connect to on-premise Db2 database from Watson Studio
 
