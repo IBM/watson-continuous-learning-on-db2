@@ -151,18 +151,22 @@ docker exec db2 su - db2inst1 -c "db2 CONNECT TO onprem USER watson USING secret
 
 At this point, you have a Db2 database instance loaded with sample data.
 
-### Configure a secure gateway to IBM Cloud
-
-To enable Watson studio to access the on-premise database, you'll need to
-configure a secure gateway, which allows limited network ingress to your
-on-premise network as governed by an access control list (ACL).
-
-Before you begin, you need to take note of your workstation's LAN IP. You can
-find that address using:
+Before you proceed further, you also need to take note of your workstation's
+LAN IP. You can find that address using either `hostname -I` or `ifconfig`,
+depending on what platform you're on.
 
 ```bash
 $ hostname -I
 192.168.1.100
+
+$ ifconfig
+wlp4s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.100  netmask 255.255.255.0  broadcast 192.168.1.255
+        ether 00:19:c3:14:ca:fb  txqueuelen 1000  (Ethernet)
+        RX packets 38087684  bytes 48297697882 (48.2 GB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 4759813  bytes 781912123 (781.9 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
 
 > Your workstation may have more than one IP, but any of them will likely work
