@@ -146,7 +146,7 @@ docker cp violations.csv db2:/tmp/
 Load the sample data into the `onprem` database in Db2:
 
 ```bash
-docker exec db2 su - db2inst1 -c "db2 CONNECT TO onprem USER watson USING secrete; db2 'LOAD FROM /tmp/violations.csv OF DEL REPLACE INTO violations'"
+docker exec db2 su - db2inst1 -c "db2 CONNECT TO onprem USER watson USING secrete; db2 'IMPORT FROM /tmp/violations.csv OF DEL SKIPCOUNT 1 INSERT INTO violations'"
 ```
 
 At this point, you have a Db2 database instance loaded with sample data.
