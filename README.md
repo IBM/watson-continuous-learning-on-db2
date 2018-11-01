@@ -52,10 +52,6 @@ learning as the training dataset evolves and grows.
   dependencies into a standardized unit for software development that includes
   everything it needs to run: code, runtime, system tools and libraries.
 
-## Watch the video
-
-[![Demo on YouTube](https://img.youtube.com/vi/HCVxGMd1RiQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=HCVxGMd1RiQ)
-
 ## Steps
 
 1. [Load sample data into an on-premises Db2 database](#load-sample-data-into-an-on-premises-db2-database)
