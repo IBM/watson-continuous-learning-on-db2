@@ -27,10 +27,10 @@ learning as the training dataset evolves and grows.
 
 ## Flow
 
-1. Source data is retained in on-premise Db2 database.
+1. Source data is retained in on-premises Db2 database.
 1. Data is accessible to Watson Studio via a Secure Gateway.
 1. Secure gateway is utilized to train a cloud-based machine learning model.
-1. Training feedback is stored on-premise for continuous learning.
+1. Training feedback is stored on-premises for continuous learning.
 
 ## Included components
 
@@ -58,19 +58,19 @@ learning as the training dataset evolves and grows.
 
 ## Steps
 
-1. [Load sample data into an on-premise Db2 database](#load-sample-data-into-an-on-premise-db2-database)
+1. [Load sample data into an on-premises Db2 database](#load-sample-data-into-an-on-premises-db2-database)
 1. [Create IBM Cloud service dependencies](#create-ibm-cloud-service-dependencies)
 1. [Configure a secure gateway to IBM Cloud](#configure-a-secure-gateway-to-ibm-cloud)
-1. [Federate your database](#federate-your-database)
+1. [Federate your on-premises Db2 database](#federate-your-on-premises-db2-database)
 1. [Create a Watson Studio project](#create-a-watson-studio-project)
 1. [Create a machine learning model](#create-a-machine-learning-model)
 1. [Enable continuous learning](#enable-continuous-learning)
 
-### Load sample data into an on-premise Db2 database
+### Load sample data into an on-premises Db2 database
 
-The fastest way to get started with Db2 on-premise is to use the no-charge
+The fastest way to get started with Db2 on-premises is to use the no-charge
 community edition, running in a Docker container. However, if you already have
-an on-premise Db2 instance, feel free to substitute that instead.
+an on-premises Db2 instance, feel free to substitute that instead.
 
 We'll be populating the database with a sample dataset of building code
 violations, provided by the city of Chicago.
@@ -206,19 +206,40 @@ Then, click **Create**.
 
 ![Create IBM Cloud Apache Spark instance](doc/source/images/02.png)
 
+From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
+[**Databases**](https://console.bluemix.net/catalog/?category=databases)
+category, and then the [**Db2
+Warehouse**](https://console.bluemix.net/catalog/services/db2-warehouse)
+service. Because we'll need administrative authorization to manage federated
+data sources, select at least the **Flex** plan (the free plan is a
+multi-tenant platform that does not allow administrative access to any tenant).
+Then, click **Create**.
+
+![Create IBM Cloud Db2 Warehouse instance](doc/source/images/03.png)
+
+When the instance has been created (the **Open** button becomes usable), click
+the **Service credentials** tab on the left, and create a new service
+credential with the default options. Click **View credentials** on the newly
+created credentials, and take note of the `username`, `password`, `host`,
+`port` values in particular, as we'll need them to configure data federation
+later using the `DB2_WAREHOUSE_USERNAME`, `DB2_WAREHOUSE_PASSWORD`,
+`DB2_WAREHOUSE_HOST`, `DB2_WAREHOUSE_PORT` variables.
+
+![Access Db2 Warehouse service credentials](doc/source/images/04.png)
+
 ### Configure a secure gateway to IBM Cloud
 
-The secure gateway allows limited network ingress to your on-premise network as
+The secure gateway allows limited network ingress to your on-premises network as
 governed by an access control list (ACL). For our use case, we will allow
-Watson Studio to securely communicate with your on-premise Db2 instance.
+Watson Studio to securely communicate with your on-premises Db2 instance.
 
 From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
 [**Integration**](https://console.bluemix.net/catalog/?category=app_services)
 category, and then the [**Secure
-Gateway**](https://console.bluemix.net/catalog/services/apache-spark) service.
+Gateway**](https://console.bluemix.net/catalog/services/secure-gateway) service.
 Then, click **Create**.
 
-![New secure gateway](doc/source/images/03.png)
+![New secure gateway](doc/source/images/05.png)
 
 From the **Secure Gateway** creation screen, select the **Essentials** plan and
 click **Create**.
@@ -257,21 +278,34 @@ will now be able to access Db2.
 At this point the link icon on the secure gateway screen should be green
 indicating that you have a client successfully connected.
 
-Before you leave the secure gateway configuration page, click the gear icon in
-the top left to reveal the **Node** hostname (for example,
-`cap-sg-prd-2.integration.ibmcloud.com`). Take note of this value, because
-you'll need it to configure data federation later.
+However, we need to go one step further and advertise our on-premises Db2 server
+as usable destination for other services within IBM Cloud. Click on the
+**Destinations** tab and click the &CirclePlus; icon to launch the wizard.
+Enter `192.168.1.100` as your destination IP, with a port value of `50000`,
+with `TCP`
 
-### Federate your database
+Once the destination is configured, click the **_i_** info icon on the
+destination tile to reveal the **Node** host and port (for example,
+`cap-sg-prd-2.integration.ibmcloud.com` and `18223`). Take note of these value,
+because you'll need them to configure data federation later, using the
+`SECURE_GATEWAY_HOST` and `SECURE_GATEWAY_PORT` variables.
 
-Db2 data virtualization (also known as data federation) is supported by Db2 on
-Cloud. Data virtualization gives you single-query access to all of your data
-that is on any number of databases distributed anywhere in your organization.
-You can access data that is on any of your Db2 or Informix data sources, both
-in the cloud and on premises.
+### Federate your on-premises database
+
+Db2 data virtualization (also known as data federation) is supported by Db2
+Warehouse on Cloud. Data virtualization gives you single-query access to all of
+your data that is on any number of databases distributed anywhere in your
+organization. You can access data that is on any of your Db2 or Informix data
+sources, both in the cloud and on-premises.
 
 This feature is supported on all versions of Db2 on Cloud, except for the free
 Lite plan.
+
+In order to remotely manage our Db2 Warehouse on Cloud, we'll create a
+throwaway Db2 instance locally in Docker which we'll use as a "client." Note
+that if you have an existing Db2 instance that you'd like to use as a client
+instead, you can run these commands directly on that server as the `db2inst1`
+user.
 
 Create a Db2 instance that we'll use a client:
 
@@ -285,16 +319,17 @@ docker run \
   db2start
 ```
 
-TODO: Create a Db2 on Cloud server.
+TODO define environment variables
 
-Store the location of the federated server on the client:
+Store the location of the Db2 Warehouse on Cloud server on the client:
 
 ```bash
-docker exec db2 su - db2inst1 -c "db2 catalog tcpip node fedS remote 10.1.1.100 server 50000"
+docker exec db2 su - db2inst1 -c "db2 catalog tcpip node fedS remote $DB2_WAREHOUSE_HOST server $DB2_WAREHOUSE_PORT"
 DB20000I The CATALOG TCPIP NODE command completed successfully.
 ```
 
-Store the location of the `bludb` database on the Db2 on cloud machine as `clouddb` on client.
+Store the location of the `bludb` database on the Db2 Warehouse on Cloud
+machine as `clouddb` on client.
 
 ```bash
 docker exec db2 su - db2inst1 -c "db2 catalog db bludb as clouddb at node fedS
@@ -392,13 +427,13 @@ Near the top right of the screen, select the **Add to project** dropdown and cho
 
 ![New Watson Studio connection](doc/source/images/11.png)
 
-Select **Db2** from the available options to connect to your on-premise Db2 server.
+Select **Db2** from the available options to connect to your on-premises Db2 server.
 
 ![New Watson Studio connection](doc/source/images/12.png)
 
 Configure the connection as follows:
 
-* **Name**: `On-Premise`
+* **Name**: `On-Premises`
 * **Database**: `onprem`
 * **Hostname or IP Address**: your workstation's LAN IP (e.g. `192.168.1.100`)
 * **Port**: `50000`
@@ -418,20 +453,20 @@ connection was successfully established from Watson Studio:
 #### Refine the asset
 
 Watson Machine Learning models do not directly support data assets from
-on-premise Db2 instances, so we have to setup a conversion process to "refine"
+on-premises Db2 instances, so we have to setup a conversion process to "refine"
 the data asset into a `CSV` file in object storage.
 
 Click the **Add to Project** dropdown again, and choose **Connected assets**.
 
 ![Add connected assets](doc/source/images/14.png)
 
-Click **Select source**, then choose the **On-Premise** connection, then the
+Click **Select source**, then choose the **On-Premises** connection, then the
 **WATSON** database, then the **VIOLATIONS** table, and finally, click the
 **Select** button at the bottom of the screen.
 
 ![Select source](doc/source/images/15.png)
 
-Name the data asset `Violations On-Premise` and click **Create**.
+Name the data asset `Violations On-Premises` and click **Create**.
 
 ![Name the data asset](doc/source/images/16.png)
 
@@ -450,15 +485,14 @@ select your Watson Machine Learning instance from the catalog, click **Create**,
 ![Associate Watson](doc/source/images/18.png)
 
 From your project overview, click the **Assets** tab, and click on
-**Violations On-Premise** (with **Data Asset** in the **Type** column).
+**Violations On-Premises** (with **Data Asset** in the **Type** column).
 
 ![Data assets](doc/source/images/19.png)
 
-At the top right, click **Refine**. We don't need to
-manipulate the data, so simply click the "run" button labeled with a
-**&#9654;** icon at the top right. The data flow output will show that you're
-creating a `CSV` file, which will be saved into your object storage bucket.
-Click **Save and Run**.
+At the top right, click **Refine**. We don't need to manipulate the data, so
+simply click the "run" button labeled with a **&#9654;** icon at the top right.
+The data flow output will show that you're creating a `CSV` file, which will be
+saved into your object storage bucket. Click **Save and Run**.
 
 ![Refine data asset](doc/source/images/20.png)
 
@@ -466,7 +500,7 @@ You can then opt to view the data flow's progress by
 clicking **View Flow**.
 
 From your project **Assets** screen, you should now see a new **Data asset**
-named `Violations On-Premise_shaped.csv`.
+named `Violations On-Premises_shaped.csv`.
 
 ![Shaped data](doc/source/images/21.png)
 
@@ -484,7 +518,7 @@ instance from the **Spark Service or Environment** dropdown, and click
 ![Violations predictor](doc/source/images/23.png)
 
 You'll then be asked to choose your data asset. Use the radio button to select
-the CSV file you just created, named `Violations On-Premise_shaped.csv`, and click
+the CSV file you just created, named `Violations On-Premises_shaped.csv`, and click
 **Next**.
 
 ![Shaped data](doc/source/images/24.png)
