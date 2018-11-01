@@ -225,31 +225,34 @@ later using the `DB2_WAREHOUSE_USERNAME`, `DB2_WAREHOUSE_PASSWORD`,
 
 ### Configure a secure gateway to IBM Cloud
 
-The secure gateway allows limited network ingress to your on-premises network as
-governed by an access control list (ACL). For our use case, we will allow
-Watson Studio to securely communicate with your on-premises Db2 instance.
+> **Warning**: completing this section will allow unauthenticated access to
+  your on-premise Db2 instance from the public internet. This is only
+  appropriate if you're using the Docker-based Db2 instance described above
+  with the provided sample data. Doing this for an existing Db2 instance with
+  real data is NOT recommended without using all available security controls,
+  such as TLS mutual authentication and IP tables.
+
+The secure gateway allows limited network ingress to your on-premises network
+as governed by an access control list (ACL). For our use case, we will allow
+Watson Studio to communicate with your on-premises Db2 instance.
 
 From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
 [**Integration**](https://console.bluemix.net/catalog/?category=app_services)
 category, and then the [**Secure
-Gateway**](https://console.bluemix.net/catalog/services/secure-gateway) service.
-Then, click **Create**.
+Gateway**](https://console.bluemix.net/catalog/services/secure-gateway)
+service. From the **Secure Gateway** creation screen, select the **Essentials**
+plan and click **Create**.
 
 ![New secure gateway](doc/source/images/05.png)
 
-From the **Secure Gateway** creation screen, select the **Essentials** plan and
-click **Create**.
-
-![New secure gateway](doc/source/images/04.png)
-
 Once the gateway is created, click **Add Gateway** to add a gateway named _Db2_.
 
-![New Secure Gateway](doc/source/images/05.png)
+![New Secure Gateway](doc/source/images/06.png)
 
 Select **Connect Client**, and take note of your **Gateway ID** and **Security
 Token**. Choose **Docker** as the connection method.
 
-![Connect Secure Gateway client](doc/source/images/06.png)
+![Connect Secure Gateway client](doc/source/images/07.png)
 
 The console will provide you with a complete Docker command to download and run
 the secure gateway client, which looks something like `docker run -it
@@ -274,17 +277,33 @@ will now be able to access Db2.
 At this point the link icon on the secure gateway screen should be green
 indicating that you have a client successfully connected.
 
+![Secure gateway connected](doc/source/images/08.png)
+
 However, we need to go one step further and advertise our on-premises Db2 server
 as usable destination for other services within IBM Cloud. Click on the
 **Destinations** tab and click the &CirclePlus; icon to launch the wizard.
-Enter `192.168.1.100` as your destination IP, with a port value of `50000`,
-with `TCP`
 
-Once the destination is configured, click the **_i_** info icon on the
-destination tile to reveal the **Node** host and port (for example,
-`cap-sg-prd-2.integration.ibmcloud.com` and `18223`). Take note of these value,
-because you'll need them to configure data federation later, using the
+![Secure gateway destination wizard](doc/source/images/09.png)
+
+Use the following values to complete the wizard:
+
+* **Destination location**: _On-Premises_
+* **Destination name**: _Db2_
+* **Destination host**: Use your own hostname from `hostname -I` or `ifconfig`, e.g. 192.168.1.100
+* **Destination port**: _50000_
+* **User-side destination authentication**: _TCP_
+* **Destination-side resource authentication**: _None_
+* **IP table rules**: leave blank
+
+![Secure Gateway destination created](doc/source/images/10.png)
+
+Once the destination is configured, click the gear &#9881; icon on the
+destination tile to reveal the **Cloud Host : Port** values (for example,
+`cap-sg-prd-3.integration.ibmcloud.com` and `18576`). Take note of these
+values, because you'll need them to configure data federation later, using the
 `SECURE_GATEWAY_HOST` and `SECURE_GATEWAY_PORT` variables.
+
+![Secure Gateway destination details](doc/source/images/11.png)
 
 ### Federate your on-premises database
 
@@ -294,16 +313,16 @@ your data that is on any number of databases distributed anywhere in your
 organization. You can access data that is on any of your Db2 or Informix data
 sources, both in the cloud and on-premises.
 
-This feature is supported on all versions of Db2 on Cloud, except for the free
-Lite plan.
+As previously described, this feature is supported on all versions of Db2 on
+Cloud, except for the free Lite plan.
 
 In order to remotely manage our Db2 Warehouse on Cloud, we'll create a
 throwaway Db2 instance locally in Docker which we'll use as a "client." Note
 that if you have an existing Db2 instance that you'd like to use as a client
-instead, you can run these commands directly on that server as the `db2inst1`
-user.
+instead, you can run these `db2` commands directly on that server as the
+`db2inst1` user.
 
-Create a Db2 instance that we'll use a client:
+Create a Db2 container named `db2-client` that we'll use a client:
 
 ```bash
 docker run \
@@ -315,86 +334,47 @@ docker run \
   db2start
 ```
 
-TODO define environment variables
+Once the Db2 client is running, we can just pass it a script from this
+repository to perform the following tasks for us:
 
-Store the location of the Db2 Warehouse on Cloud server on the client:
+1. Catalog the location of the Db2 Warehouse on Cloud server on the Db2 client.
+2. Catalog the location of the default database on the Db2 Warehouse instance
+   (`bludb`) as `clouddb` on client.
+3. Connect to the database on the Db2 Warehouse on Cloud instance (`clouddb`)
+   using the default `bluadmin` user.
+4. Create a [federated DRDA
+   wrapper](https://www.ibm.com/support/knowledgecenter/en/SSEPGG_9.7.0/com.ibm.swg.im.iis.db.fed.overview.doc/topics/cfpint07.html)
+   on Db2 Warehouse on Cloud.
+5. Configure the federated wrapper to authenticate with the on-premise
+   data source through the secure gateway.
+6. Create a user mapping from the Db2 Warehouse user to the on-premise user.
+7. Create a shortcut on the Db2 Warehouse for the `violations` table
+   on-premises.
+8. Test the connection by querying the federated table for a row count, which
+   should return the correct row count of the on-premise database.
 
-```bash
-docker exec db2 su - db2inst1 -c "db2 catalog tcpip node fedS remote $DB2_WAREHOUSE_HOST server $DB2_WAREHOUSE_PORT"
-DB20000I The CATALOG TCPIP NODE command completed successfully.
-```
-
-Store the location of the `bludb` database on the Db2 Warehouse on Cloud
-machine as `clouddb` on client.
-
-```bash
-docker exec db2 su - db2inst1 -c "db2 catalog db bludb as clouddb at node fedS
-DB20000I The CATALOG DATABASE command completed successfully.
-```
-
-Connect to the `clouddb` database using bluadmin user:
-
-```bash
-docker exec db2 su - db2inst1 -c "db2 connect to clouddb user bluadmin using db2inst1"
-Database Connection Information
-Database server = DB2/LINUXX8664 11.1.3.3
-SQL authorization ID = BLUADMIN
-Local database alias = CLOUDDB
-```
-
-Create a wrapper on Db2 on Cloud.
+Run the following command, substituting your own values for each environment
+variable collected in the previous sections:
 
 ```bash
-docker exec db2 su - db2inst1 -c "db2 'CREATE WRAPPER drda'"
-DB20000I The SQL command completed successfully.
+docker cp federate.sh db2-client:/tmp/
+docker exec \
+  -e DB2_WAREHOUSE_HOST="db2whoc-flex-gyjdbqu.services.dal.bluemix.net" \
+  -e DB2_WAREHOUSE_PORT="50000" \
+  -e DB2_WAREHOUSE_USERNAME="bluadmin" \
+  -e DB2_WAREHOUSE_PASSWORD="5p2u3AUG2TxR_8P22C3Z@aGiZ9aNX" \
+  -e SECURE_GATEWAY_HOST="cap-sg-prd-3.integration.ibmcloud.com" \
+  -e SECURE_GATEWAY_PORT="18576" \
+  -e DB2_ON_PREM_USERNAME="watson" \
+  -e DB2_ON_PREM_PASSWORD="secrete" \
+  -e DB2_ON_PREM_DATABASE="onprem" \
+  -e DB2_ON_PREM_TABLE="violations" \
+  db2-client su -m - db2inst1 -c "sh /tmp/federate.sh"
 ```
 
-Next, the IBM Cloud Secure Gateway service will allow the Db2 on Cloud database
-to communicate with the on-prem data source.
-
-Begin by storing the value of your Secure Gateway's **Node** hostname in a
-variable (just to avoid typos).
-
-```bash
-export SECURE_GATEWAY_NODE=cap-sg-prd-2.integration.ibmcloud.com
-```
-
-Use the `SECURE_GATEWAY_NODE` to create a server to talk to the on-prem
-datasource:
-
-> TODO Check that port 15507 corresponds to something.
-
-```bash
-docker exec db2 su - db2inst1 -c "db2 'create server db2server type dashdb version 11 wrapper drda authorization \"db2inst1\" password \"db2inst1\" options (host \"$SECURE_GATEWAY_NODE\", port \"15507\", dbname \"onprem\")'"
-DB20000I The SQL command completed successfully.
-```
-
-Create the user mapping for remote user db2inst1.
-
-The user bluadmin has to be on the Db2 on cloud machine.
-
-```bash
-docker exec db2 su - db2inst1 -c "db2 'create user mapping for bluadmin server db2server options (remote_authid \"db2inst1\", remote_password \"db2inst1\")'"
-DB20000I The SQL command completed successfully.
-```
-
-Create a nickname for the on-prem datasource.
-
-```bash
-docker exec db2 su - db2inst1 -c "db2 -v 'create nickname onprem for db2server.db2inst1.onprem'"
-create nickname onprem for db2server.db2inst1.violations
-DB20000I The SQL command completed successfully.
-```
-
-Test to make sure you can pull data from the on-prem datasource.
-
-```bash
-docker exec db2 su - db2inst1 -c "db2 'select * from onprem'"
-C1 C2
------------ -----------
-13 32
-1 record(s) selected.
-```
+At this point, your Db2 client has successfully connected to your Db2 Warehouse
+on Cloud, which is federating data through your Secure Gateway from your
+on-premises data source as a user managed on-premises!
 
 ### Create a Watson Studio project
 
