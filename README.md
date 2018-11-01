@@ -384,28 +384,28 @@ the [**Watson
 Studio**](https://console.bluemix.net/catalog/services/watson-studio) service.
 Then, click **Create**.
 
-![Create IBM Cloud Watson Studio service](doc/source/images/07.png)
+![Create IBM Cloud Watson Studio service](doc/source/images/12.png)
 
 Click the **Get Started** button to navigate to Watson Studio.
 
 From Watson Studio, click the **New Project** button, and select **Complete**, when prompted, to enable all features in Watson Studio.
 
-![Watson Studio](doc/source/images/08.png)
+![Watson Studio](doc/source/images/13.png)
 
-![Watson Studio](doc/source/images/09.png)
+![Watson Studio](doc/source/images/14.png)
 
 Enter `Violations` as the project name, and click **Create**.
 
-![Watson Studio](doc/source/images/10.png)
+![Watson Studio](doc/source/images/15.png)
 
 Near the top right of the screen, select the **Add to project** dropdown and choose
 **Connection**.
 
-![New Watson Studio connection](doc/source/images/11.png)
+![New Watson Studio connection](doc/source/images/16.png)
 
-Select **Db2** from the available options to connect to your on-premises Db2 server.
+TODO Select **Db2** from the available options to connect to your on-premises Db2 server.
 
-![New Watson Studio connection](doc/source/images/12.png)
+![New Watson Studio connection](doc/source/images/17.png)
 
 Configure the connection as follows:
 
@@ -419,7 +419,7 @@ Configure the connection as follows:
 
 Click **Create** when you are ready.
 
-![New connection configuration](doc/source/images/13.png)
+![New connection configuration](doc/source/images/18.png)
 
 In the secure gateway terminal, you may see a log message indicating that a
 connection was successfully established from Watson Studio:
@@ -434,17 +434,17 @@ the data asset into a `CSV` file in object storage.
 
 Click the **Add to Project** dropdown again, and choose **Connected assets**.
 
-![Add connected assets](doc/source/images/14.png)
+![Add connected assets](doc/source/images/19.png)
 
 Click **Select source**, then choose the **On-Premises** connection, then the
 **WATSON** database, then the **VIOLATIONS** table, and finally, click the
 **Select** button at the bottom of the screen.
 
-![Select source](doc/source/images/15.png)
+![Select source](doc/source/images/20.png)
 
 Name the data asset `Violations On-Premises` and click **Create**.
 
-![Name the data asset](doc/source/images/16.png)
+![Name the data asset](doc/source/images/21.png)
 
 We now need to associate our Apache Spark service and Watson Machine Learning services
 to Watson Studio so that Watson Studio can leverage them.
@@ -453,24 +453,24 @@ Navigate to the **Settings** tab of your project, and click **Add service**.
 Choose **Spark** from the dropdown, switch to the **Existing** tab, select your Apache Spark instance
 from the list, and click **Select**.
 
-![Associate Apache Spark](doc/source/images/17.png)
+![Associate Apache Spark](doc/source/images/22.png)
 
 Once more, click **Add service**. Choose **Watson** from the dropdown,
 select your Watson Machine Learning instance from the catalog, click **Create**, and then **Confirm**.
 
-![Associate Watson](doc/source/images/18.png)
+![Associate Watson](doc/source/images/23.png)
 
 From your project overview, click the **Assets** tab, and click on
 **Violations On-Premises** (with **Data Asset** in the **Type** column).
 
-![Data assets](doc/source/images/19.png)
+![Data assets](doc/source/images/24.png)
 
 At the top right, click **Refine**. We don't need to manipulate the data, so
 simply click the "run" button labeled with a **&#9654;** icon at the top right.
 The data flow output will show that you're creating a `CSV` file, which will be
 saved into your object storage bucket. Click **Save and Run**.
 
-![Refine data asset](doc/source/images/20.png)
+![Refine data asset](doc/source/images/25.png)
 
 You can then opt to view the data flow's progress by
 clicking **View Flow**.
@@ -478,26 +478,26 @@ clicking **View Flow**.
 From your project **Assets** screen, you should now see a new **Data asset**
 named `Violations On-Premises_shaped.csv`.
 
-![Shaped data](doc/source/images/21.png)
+![Shaped data](doc/source/images/26.png)
 
 ### Create a machine learning model
 
 From your project's **Assets** screen, click **New Watson Machine Learning
 model**.
 
-![New machine learning model](doc/source/images/22.png)
+![New machine learning model](doc/source/images/27.png)
 
 Name your model **Violations Predictor**, select your Apache Spark service
 instance from the **Spark Service or Environment** dropdown, and click
 **Create**.
 
-![Violations predictor](doc/source/images/23.png)
+![Violations predictor](doc/source/images/28.png)
 
 You'll then be asked to choose your data asset. Use the radio button to select
 the CSV file you just created, named `Violations On-Premises_shaped.csv`, and click
 **Next**.
 
-![Shaped data](doc/source/images/24.png)
+![Shaped data](doc/source/images/29.png)
 
 When the data is finished loading, you'll be asked to **Select a technique**.
 Choose `INSPECTION_STATUS (String)` as your **Column value to predict (Label
@@ -509,32 +509,32 @@ repeat to add a **Random Forest Classifier**.
 
 Finally, click **Next**.
 
-![Configure model](doc/source/images/25.png)
+![Configure model](doc/source/images/30.png)
 
 When training for each model is complete (_Trained &amp; Evaluated_), review
 each of their performance metrics, select the one that best suits your use case
 (we'll use the _DecisionTreeClassifier_ here). Click **Save** to store your
 model.
 
-![Model training](doc/source/images/26.png)
+![Model training](doc/source/images/31.png)
 
 You can now deploy the model to use in your own application. Click **Add Deployment**.
 
-![Model trained](doc/source/images/27.png)
+![Model trained](doc/source/images/32.png)
 
 Name the model **Inspection Status**, and click **Save**.
 
-![Model deployment](doc/source/images/28.png)
+![Model deployment](doc/source/images/33.png)
 
 Wait for your model to be deployed (_DEPLOY_SUCCESS_), and then click on it.
 
-![Model deployed](doc/source/images/29.png)
+![Model deployed](doc/source/images/34.png)
 
 The deployed model will be be provided with documentation to consume the model in several different programming languages.
 
 ## Sample output
 
-![Ready to consume cloud-based model](doc/source/images/30.png)
+![Ready to consume cloud-based model](doc/source/images/35.png)
 
 ## Troubleshooting
 
