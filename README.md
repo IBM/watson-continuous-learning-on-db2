@@ -185,27 +185,27 @@ can do for free. In our use case, Watson Studio will rely on the Object Storage
 service to store it's data, the Apache Spark service for data processing, and
 the Machine Learning service for building machine learning models.
 
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**Storage**](https://console.bluemix.net/catalog/?category=storage) category,
+From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
+[**Storage**](https://cloud.ibm.com/catalog/?category=storage) category,
 and then the [**Object
-Storage**](https://console.bluemix.net/catalog/services/cloud-object-storage)
+Storage**](https://cloud.ibm.com/catalog/services/cloud-object-storage)
 service. Then, click **Create**.
 
 ![Create IBM Cloud Object Storage service](doc/source/images/01.png)
 
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
+From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
 [**Web and
-Application**](https://console.bluemix.net/catalog/?category=app_services)
+Application**](https://cloud.ibm.com/catalog/?category=app_services)
 category, and then the [**Apache
-Spark**](https://console.bluemix.net/catalog/services/apache-spark) service.
+Spark**](https://cloud.ibm.com/catalog/services/apache-spark) service.
 Then, click **Create**.
 
 ![Create IBM Cloud Apache Spark instance](doc/source/images/02.png)
 
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**Databases**](https://console.bluemix.net/catalog/?category=databases)
+From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
+[**Databases**](https://cloud.ibm.com/catalog/?category=databases)
 category, and then the [**Db2
-Warehouse**](https://console.bluemix.net/catalog/services/db2-warehouse)
+Warehouse**](https://cloud.ibm.com/catalog/services/db2-warehouse)
 service. Because we'll need administrative authorization to manage federated
 data sources, select at least the **Flex** plan (the free plan is a
 multi-tenant platform that does not allow administrative access to any tenant).
@@ -236,10 +236,10 @@ The secure gateway allows limited network ingress to your on-premises network
 as governed by an access control list (ACL). For our use case, we will allow
 Watson Studio to communicate with your on-premises Db2 instance.
 
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**Integration**](https://console.bluemix.net/catalog/?category=app_services)
+From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
+[**Integration**](https://cloud.ibm.com/catalog/?category=app_services)
 category, and then the [**Secure
-Gateway**](https://console.bluemix.net/catalog/services/secure-gateway)
+Gateway**](https://cloud.ibm.com/catalog/services/secure-gateway)
 service. From the **Secure Gateway** creation screen, select the **Essentials**
 plan and click **Create**.
 
@@ -378,10 +378,10 @@ on-premises data source as a user managed on-premises!
 
 ### Create a Watson Studio project
 
-From the [IBM Cloud Catalog](https://console.bluemix.net/catalog/), select the
-[**AI**](https://console.bluemix.net/catalog/?category=ai) category, and then
+From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
+[**AI**](https://cloud.ibm.com/catalog/?category=ai) category, and then
 the [**Watson
-Studio**](https://console.bluemix.net/catalog/services/watson-studio) service.
+Studio**](https://cloud.ibm.com/catalog/services/watson-studio) service.
 Then, click **Create**.
 
 ![Create IBM Cloud Watson Studio service](doc/source/images/12.png)
@@ -551,7 +551,7 @@ The deployed model will be be provided with documentation to consume the model i
 
 * [Continuous Learning on Watson Studio](https://medium.com/ibm-data-science-experience/continuous-learning-on-watson-data-platform-cc39f3fd5042)
 * [IBM Watson Studio](https://dataplatform.cloud.ibm.com/docs/content/getting-started/welcome-main.html) documentation
-* [IBM Secure Gateway](https://console.bluemix.net/docs/services/SecureGateway/index.html) documentation
+* [IBM Secure Gateway](https://cloud.ibm.com/docs/services/SecureGateway/index.html) documentation
 * [Docker](https://docs.docker.com/) documentation
 * [Db2](https://www.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.kc.doc/welcome.html) documentation
 * Related code pattern: [Continuous learning on Db2](https://github.com/IBM/watson-continuous-learning-on-db2)
