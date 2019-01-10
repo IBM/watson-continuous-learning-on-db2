@@ -226,11 +226,11 @@ later using the `DB2_WAREHOUSE_USERNAME`, `DB2_WAREHOUSE_PASSWORD`,
 ### Configure a secure gateway to IBM Cloud
 
 > **Warning**: completing this section will allow unauthenticated access to
-  your on-premise Db2 instance from the public internet. This is only
-  appropriate if you're using the Docker-based Db2 instance described above
-  with the provided sample data. Doing this for an existing Db2 instance with
-  real data is NOT recommended without using all available security controls,
-  such as TLS mutual authentication and IP tables.
+> your on-premise Db2 instance from the public internet. This is only
+> appropriate if you're using the Docker-based Db2 instance described above
+> with the provided sample data. Doing this for an existing Db2 instance with
+> real data is NOT recommended without using all available security controls,
+> such as TLS mutual authentication and IP tables.
 
 The secure gateway allows limited network ingress to your on-premises network
 as governed by an access control list (ACL). For our use case, we will allow
