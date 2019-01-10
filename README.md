@@ -1,6 +1,6 @@
 # Continuously train a cloud-based machine learning model from on-premise Db2 data
 
-[![Build Status](https://travis-ci.org/IBM/watson-continuous-learning-on-db2.svg?branch=master)](https://travis-ci.org/IBM/watson-continuous-learning-on-db2)
+[![Build Status](https://api.travis-ci.org/IBM/watson-continuous-learning-on-db2.svg?branch=master)](https://travis-ci.org/IBM/watson-continuous-learning-on-db2)
 
 Many companies and individuals struggle to use their on-premises data &mdash;
 the kind of data that lives on a local machine, within your data center, behind
@@ -79,7 +79,7 @@ launch Db2 community edition in a container running in the background.
 
 > Including the `--env LICENSE="accept"` argument indicates your acceptance of
 > the [license
-> agreement](http://www-03.ibm.com/software/sla/sladb.nsf/displaylis/5DF1EE126832D3F185257DAB0064BEFA?OpenDocument)
+> agreement](https://www-03.ibm.com/software/sla/sladb.nsf/displaylis/5DF1EE126832D3F185257DAB0064BEFA?OpenDocument)
 > to use the software contained in the Docker image.
 
 This command sets a password for the default instance user (`db2inst1`) to
@@ -186,7 +186,7 @@ service to store it's data, the Apache Spark service for data processing, and
 the Machine Learning service for building machine learning models.
 
 From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
-[**Storage**](https://cloud.ibm.com/catalog/?category=storage) category,
+[**Storage**](https://cloud.ibm.com/catalog?category=storage) category,
 and then the [**Object
 Storage**](https://cloud.ibm.com/catalog/services/cloud-object-storage)
 service. Then, click **Create**.
@@ -195,7 +195,7 @@ service. Then, click **Create**.
 
 From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
 [**Web and
-Application**](https://cloud.ibm.com/catalog/?category=app_services)
+Application**](https://cloud.ibm.com/catalog?category=app_services)
 category, and then the [**Apache
 Spark**](https://cloud.ibm.com/catalog/services/apache-spark) service.
 Then, click **Create**.
@@ -203,7 +203,7 @@ Then, click **Create**.
 ![Create IBM Cloud Apache Spark instance](doc/source/images/02.png)
 
 From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
-[**Databases**](https://cloud.ibm.com/catalog/?category=databases)
+[**Databases**](https://cloud.ibm.com/catalog?category=databases)
 category, and then the [**Db2
 Warehouse**](https://cloud.ibm.com/catalog/services/db2-warehouse)
 service. Because we'll need administrative authorization to manage federated
@@ -237,7 +237,7 @@ as governed by an access control list (ACL). For our use case, we will allow
 Watson Studio to communicate with your on-premises Db2 instance.
 
 From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
-[**Integration**](https://cloud.ibm.com/catalog/?category=app_services)
+[**Integration**](https://cloud.ibm.com/catalog?category=app_services)
 category, and then the [**Secure
 Gateway**](https://cloud.ibm.com/catalog/services/secure-gateway)
 service. From the **Secure Gateway** creation screen, select the **Essentials**
@@ -379,7 +379,7 @@ on-premises data source as a user managed on-premises!
 ### Create a Watson Studio project
 
 From the [IBM Cloud Catalog](https://cloud.ibm.com/catalog/), select the
-[**AI**](https://cloud.ibm.com/catalog/?category=ai) category, and then
+[**AI**](https://cloud.ibm.com/catalog?category=ai) category, and then
 the [**Watson
 Studio**](https://cloud.ibm.com/catalog/services/watson-studio) service.
 Then, click **Create**.
@@ -559,7 +559,7 @@ The deployed model will be be provided with documentation to consume the model i
 
 ## Learn more
 
-* **Artificial Intelligence Code Patterns**: Enjoyed this Code Pattern? Check out our other [AI Code Patterns](https://developer.ibm.com/code/technologies/artificial-intelligence/).
+* **Artificial Intelligence Code Patterns**: Enjoyed this Code Pattern? Check out our other [AI Code Patterns](https://developer.ibm.com/technologies/artificial-intelligence/).
 * **AI and Data Code Pattern Playlist**: Bookmark our [playlist](https://www.youtube.com/playlist?list=PLzUbsvIyrNfknNewObx5N7uGZ5FKH0Fde) with all of our Code Pattern videos
 * **With Watson**: Want to take your Watson app to the next level? Looking to utilize Watson Brand assets? [Join the With Watson program](https://www.ibm.com/watson/with-watson/) to leverage exclusive brand, marketing, and tech resources to amplify and accelerate your Watson embedded commercial solution.
 
